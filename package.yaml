@@ -1,0 +1,101 @@
+
+name:                yaths
+version:             0.1.0.0
+github:              lisss/yaths
+license:             BSD3
+author:              Liss
+maintainer:          alicedeadbride@gmail.com
+copyright:           2017 Liss
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+synopsis:            Just yet another try of Haskell learning
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on Github at <https://github.com/lisss/yaths#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- time
+- containers
+- QuickCheck
+
+library:
+  source-dirs:
+  - src
+  - src/chapters
+  - src/morse
+  - src/quickCheck
+
+executables:
+  main:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - yaths
+  cipher:
+    main:                Cipher.hs
+    source-dirs:         src/chapters
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is Cipher
+    dependencies:
+    - yaths
+  morse:
+    main:                MorseMain.hs
+    source-dirs:         src/morse
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is MorseMain
+    dependencies:
+    - yaths
+
+tests:
+  addition:
+    ghc-options:
+    - -Wall -fno-warn-orphans
+    - -main-is AdditionTest
+    main: AdditionTest.hs
+    source-dirs: test
+    dependencies:
+    - yaths
+    - hspec
+  word-number:
+    ghc-options:
+    - -Wall -fno-warn-orphans
+    - -main-is WordNumberTest
+    main: WordNumberTest.hs
+    source-dirs: test
+    dependencies:
+    - yaths
+    - hspec
+  gen:
+    ghc-options:
+    - -Wall -fno-warn-orphans
+    - -main-is GenTest
+    main: GenTest.hs
+    source-dirs: test
+    dependencies:
+    - yaths
+  qc:
+    ghc-options:
+    - -Wall -fno-warn-orphans
+    - -main-is QuickCheckTest
+    main: QuickCheckTest.hs
+    source-dirs: test
+    dependencies:
+    - yaths

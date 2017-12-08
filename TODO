@@ -1,0 +1,13 @@
+Try to write a tool for building typeclasses tree
+lifted/unlifted types
+trace
+DataKinds pragma (for custom kinds) (https://www.schoolofhaskell.com/user/k_bx/playing-with-datakinds)
+
+
+-- groupRes :: [(Digit, Presses)] -> [(Digit, [Presses])]
+-- groupRes = map (\l -> (fst . head $ l, map snd l)) . groupBy (\a b -> fst a == fst b)
+--   . sortBy (comparing fst)
+
+hindent - set up autoformatting
+
+WDIO reporter
