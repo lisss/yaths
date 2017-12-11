@@ -2,8 +2,10 @@
 module QuickCheckTest where
 
 import Test.QuickCheck
+import Test.QuickCheck.Function
 import Data.List (sort)
 import Data.Char(toUpper)
+import Chapter11(capitalizeWord)
 
 -- 1.
 half :: Double -> Double
@@ -95,17 +97,15 @@ listGen1 = listOf arbitrary
 prop_reverse :: Property
 prop_reverse = forAll listGen1 $ \x -> (reverse . reverse $ x) == id x
 
--- 8. TODO>>>>>
+-- 8.
 -- f $ a = f a
 -- f . g = \x -> f (g x)
-f :: Int -> Int
-f a = a
 
-trueGen :: Gen Int
-trueGen = coarbitrary True arbitrary
+prop_dollar :: Eq b => Fun a b -> a -> Bool
+prop_dollar (Fn f) x = f x == (f $ x)
 
--- prop_fn :: Property
-prop_fn x = (f $ x) == f x
+prop_dot :: Eq a => Fun b a -> Fun a b -> a -> Bool
+prop_dot (Fn f) (Fn g) x = (f . g $ x) == (\x' -> f (g x')) x
 
 -- 9. 
 -- foldr (:) == (++)
@@ -151,11 +151,7 @@ squareIdentity = square . sqrt
 -- Idempotence
 twice f = f . f
 fourTimes = twice . twice
--- 1. TODO >>>>> move all the stuff to a single project
-capitalizeWord :: String -> String
-capitalizeWord [] = []
-capitalizeWord (x:xs)= toUpper x : xs
-
+-- 1.
 f3 x = (capitalizeWord x == twice capitalizeWord x) && (capitalizeWord x == fourTimes capitalizeWord x)
 
 stringGen :: Gen String
@@ -200,7 +196,8 @@ main = do
   quickCheck prop_expAss
   quickCheck prop_expComm
   quickCheck prop_reverse
-  quickCheck prop_fn
+  quickCheck (prop_dollar :: Fun Int String -> Int -> Bool)
+  quickCheck (prop_dot :: Fun Int Char -> Fun Char Int -> Char -> Bool)
   quickCheck prop_foldr1
   quickCheck prop_foldr2
   quickCheck prop_length

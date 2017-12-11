@@ -1,40 +1,41 @@
 module Test where
 
-import Control.Monad (forever)
-import Data.Char (toLower)
-import Data.Maybe (isJust)
-import Data.List (intersperse)
-import System.Exit (exitSuccess)
-import System.Random (randomRIO)
+-- import Hangman(Puzzle, fillInCharacter, handleGuess)
+import Hangman
+import Test.QuickCheck
+import Test.Hspec
 
+-- pzGen :: Gen (String -> Puzzle)
+-- pzGen = do
+--   a <- arbitrary :: Gen String
+--   b <- listOf (arbitrary :: Gen (Maybe Char))
+--   return (Puzzle a b)
+
+-- TODO: use gen?
 main :: IO ()
-main = do
-  words <- gameWords
-  randomWord words
+main = hspec $ do
+  describe "fillInCharacter" $ do
+    it "fresh puzzle" $ do
+      let pzl = freshPuzzle "liss"
+      let pzl1 = Puzzle "liss" (map (\x' -> Nothing) "liss") "a"
+      fillInCharacter pzl 'a' `shouldBe` pzl1
+    it "filled in puzzle" $ do
+      let pzl = Puzzle "liss" [Just 'b'] []
+      let pzl1 = Puzzle "liss" [Just 'b'] "b"
+      fillInCharacter pzl 'b' `shouldBe` pzl1
+    it "guessed multiple" $ do
+      let pzl = Puzzle "liss" [Just 'b'] []
+      let pzl1 = Puzzle "liss" [Just 'b'] "bx"
+      fillInCharacter (fillInCharacter pzl 'x') 'b' `shouldBe` pzl1
+  describe "handleGuess" $ do
+    it "fresh puzzle" $ do
+      let pzl = freshPuzzle "liss"
+      let pzl1 = Puzzle "liss" (map (\x' -> Nothing) "liss") "a"
+      res <- handleGuess pzl 'a'
+      res `shouldBe` pzl1
+    it "guessed" $ do
+      let pzl = freshPuzzle "liss"
+      let pzl1 = Puzzle "liss" (map (\x -> Nothing) "li" ++ map (\x -> Just x) "ss") "s"
+      res <- handleGuess pzl 's'
+      res `shouldBe` pzl1
 
-type WordList = [String]
-
--- allWords :: IO WordList
-allWords = do
-  dict <- readFile "data/dict.txt"
-  return (lines dict)
-
-minWordLength :: Int
-minWordLength = 5
-
-maxWordLength :: Int
-maxWordLength = 9
-
-gameWords :: IO WordList
-gameWords = do
-  aw <- allWords
-  return (filter gameLength aw)
-  where gameLength w =
-          let l = length (w :: String)
-          in l >= minWordLength
-            && l < maxWordLength
-
-randomWord :: WordList -> IO String
-randomWord wl = do
-  randomIndex <- randomRIO (0 , wl - 1)
-  return $ wl !! randomIndex

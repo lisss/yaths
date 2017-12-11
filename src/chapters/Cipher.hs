@@ -36,6 +36,15 @@ vigenere x = go x (repeat' x "ally") where
     | y' == ' ' = ' ' : go xs ys
     | otherwise = caesar [x'] (ord y' - ord 'a') ++ go xs ys
 
+unVigenere :: [Char] -> [Char]
+unVigenere [] = []
+unVigenere x = go x (repeat' x "ally") where
+  go [] _ = []
+  go _ [] = []
+  go (x': xs) (y' : ys)
+    | y' == ' ' = ' ' : go xs ys
+    | otherwise = unCaesar [x'] (ord y' - ord 'a') ++ go xs ys
+
 main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering

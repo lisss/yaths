@@ -37,7 +37,7 @@ randomWord (WordList wl) = do
 randomWord' :: IO String
 randomWord' = gameWords >>= randomWord
 
-data Puzzle = Puzzle String [Maybe Char] [Char]
+data Puzzle = Puzzle String [Maybe Char] [Char] deriving Eq
 
 instance Show Puzzle where
   show (Puzzle _ discovered guessed) =
@@ -123,11 +123,11 @@ runGame puzzle = forever $ do
       putStrLn "Your guess must\
       \ be a single character"
 
-main :: IO ()
-main = do
-  word <- randomWord'
-  let puzzle = freshPuzzle (fmap toLower word)
-  runGame puzzle
+-- main :: IO ()
+-- main = do
+--   word <- randomWord'
+--   let puzzle = freshPuzzle (fmap toLower word)
+--   runGame puzzle
 
 
 -- 13.14 Chapter exercises

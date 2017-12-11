@@ -85,14 +85,23 @@ getMax (x:xs) = go x xs
 mostTypedLetter :: String -> (Digit, Presses)
 mostTypedLetter = getMax . groupSum
 
+-- | Test mostPopularLetter
+-- >>> mostPopularLetter "adddvbyty"
+-- 'y'
+mostPopularLetter :: String -> Digit
+mostPopularLetter = fst . mostTypedLetter
+
 coolestLtr :: [String] -> Char
 coolestLtr = fst . getMax . concatSum . groupRes . map mostTypedLetter
 
 -- Not clear exercise requirement...
 -- This one returns the most typed word itself
-coolestWord :: [String] -> String
-coolestWord x = fst . getMax . map (\x' -> (,) x' . fingerTaps . groupSum $ x') . concatMap words $ x
+-- coolestWord :: [String] -> String
+-- coolestWord x = fst . getMax . map (\x' -> (,) x' . fingerTaps . groupSum $ x') . concatMap words $ x
 
--- This one returns the most typed word given its number of appearances
-coolestWord' :: [String] -> String
-coolestWord' x = fst . getMax . concatSum . groupRes . map (\x' -> (,) x' . fingerTaps . groupSum $ x') . concatMap words $ x
+-- | Test coolestWord
+-- >>> coolestWord' convo
+-- "Lol"
+coolestWord :: [String] -> String
+coolestWord [] = ""
+coolestWord x = fst . getMax . concatSum . groupRes . map (\x' -> (,) x' . fingerTaps . groupSum $ x') . concatMap words $ x
