@@ -100,7 +100,7 @@ coolestLtr = fst . getMax . concatSum . groupRes . map mostTypedLetter
 -- coolestWord x = fst . getMax . map (\x' -> (,) x' . fingerTaps . groupSum $ x') . concatMap words $ x
 
 -- | Test coolestWord
--- >>> coolestWord' convo
+-- >>> coolestWord convo
 -- "Lol"
 coolestWord :: [String] -> String
 coolestWord [] = ""

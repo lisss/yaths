@@ -237,8 +237,7 @@ type CombineAssoc a b = Combine a b -> Combine a b -> Combine a b -> Bool
 newtype Comp a = Comp { unComp :: a -> a }
 
 instance (S.Semigroup a) => S.Semigroup (Comp a) where
-  Comp { unComp = f } <> Comp { unComp = g } =
-    Comp { unComp = \x -> f x S.<> g x }
+  Comp f <> Comp g = Comp (f S.<> g)
 
 -- f = Comp $ \n -> n + 1
 -- g = Comp $ \n -> n - 1
