@@ -325,10 +325,10 @@ data GoatLord a =
   (GoatLord a)
   (GoatLord a)
 
--- instance Functor GoatLord where
---   fmap _ NoGoat = NoGoat
---   fmap f (OneGoat a) = OneGoat (f a)
---   fmap f (MoreGoats a b c) = MoreGoats (GoatLord a) (GoatLord b) (GoatLord c)
+instance Functor GoatLord where
+  fmap _ NoGoat = NoGoat
+  fmap f (OneGoat a) = OneGoat (f a)
+  fmap f (MoreGoats a b c) = MoreGoats (fmap f a) (fmap f b) (fmap f c)
 
 -- 11. does it work tho ???
 data TalkToMe a =
