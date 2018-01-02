@@ -1,6 +1,11 @@
 module Applicatives where
 
 import Data.List (elemIndex)
+import Data.Monoid((<>), Sum)
+import Control.Applicative (liftA3)
+import Test.QuickCheck
+import Test.QuickCheck.Checkers
+import Test.QuickCheck.Classes
 
 -- Exercises: Lookups
 
@@ -65,7 +70,7 @@ instance Functor (Constant a) where
 
 instance Monoid a => Applicative (Constant a) where
   pure _ = Constant mempty
-  (<*>) (Constant a) (Constant b) = Constant (mappend a b)
+  (<*>) (Constant a) (Constant b) = Constant (a <> b)
 
 -- Using the Maybe Applicative (example)
 validateLength :: Int
@@ -131,12 +136,258 @@ flatMap f as = concat' $ fmap f as
 instance Applicative List where
   pure a = Cons a Nil
   (<*>) Nil xs = Nil
-  (<*>) (Cons f xs) ys = mappend (flatMap (\x -> Cons (f x) Nil) ys) (xs <*> ys)
+  (<*>) (Cons f xs) ys = (flatMap (\x -> Cons (f x) Nil) ys) <> (xs <*> ys)
 
 f = Cons (+1) (Cons (*2) Nil)
 v = Cons 1 (Cons 2 Nil)
 fv = f <*> v
 
+instance Eq a => EqProp (List a) where (=-=) = eq
+
+instance Arbitrary a => Arbitrary (List a) where
+  arbitrary = do
+    a <- arbitrary
+    elements [Nil, Cons a Nil]
+
+-- ZipList Applicative Exercise (<<<< TODO >>>> tests)
+take' :: Int -> List a -> List a
+take' _ Nil = Nil
+take' n (Cons x xs) = Cons x (take' (n - 1) xs)
+
+newtype ZipList' a = ZipList' (List a) deriving (Eq, Show)
+
+instance Eq a => EqProp (ZipList' a) where
+  xs =-= ys = xs' `eq` ys'
+    where xs' = let (ZipList' l) = xs
+                in take' 3000 l
+          ys' = let (ZipList' l) = ys
+                in take' 3000 l
+
+instance Arbitrary a => Arbitrary (ZipList' a) where
+  arbitrary = ZipList' <$> arbitrary
+
+instance Functor ZipList' where
+  fmap f (ZipList' xs) = ZipList' $ fmap f xs
+
+instance Applicative ZipList' where
+  pure a = ZipList' (Cons a Nil)
+  (<*>) (ZipList' f) (ZipList' l) = ZipList' (f <*> l)
+
+-- zl' = ZipList'
+-- z_ = zl' [(+9), (*2), (+8)]
+-- z' = zl' [1..3]
+-- zz = z_ <*> z'
+
+-- Exercise: Variations on Either
+data Validation e a =
+  Failure' e
+  | Success' a
+  deriving (Eq, Show)
+
+data Errors =
+  DividedByZero
+  | StackOverflow
+  | MooglesChewedWires
+  deriving (Eq, Show)
+
+instance Functor (Validation e) where
+  fmap _ (Failure' e) = Failure' e
+  fmap f (Success' a) = Success' (f a)
+
+instance Monoid e => Applicative (Validation e) where
+  pure = Success'
+  (<*>) (Failure' f) (Failure' ff) = Failure' $ f <> ff
+  (<*>) (Failure' f) _ = Failure' f
+  (<*>) _ (Failure' f) = Failure' f
+  (<*>) (Success' f) s = fmap f s
+
+instance (Eq a, Eq b) => EqProp (Validation a b) where (=-=) = eq
+
+instance (Arbitrary e, Arbitrary a) => Arbitrary (Validation e a) where
+  arbitrary = do 
+    e <- arbitrary
+    a <- arbitrary
+    elements [Success' a, Failure' e]
+
+-- Chapter Exercises
+-- specialize the types of the methods
+
+-- 1. []
+-- pure :: a -> [] a
+-- (<*>) :: [] (a -> b) -> [] a -> [] b
+
+-- 2. IO
+-- pure :: a -> IO a
+-- (<*>) :: IO (a -> b) -> IO a -> IO b
+
+-- 3. (,) a --> TODO
+-- pure :: a -> (b -> (a, b))
+
+-- 4. (->) e --> TODO
+-- pure :: (e -> a -> e)
+
+-- Write instances for the following datatypes. 
+-- 1.
+data Pair a = Pair a a deriving (Eq, Show)
+
+instance Functor Pair where
+  fmap f (Pair a b) = Pair (f a) (f b)
+
+instance Applicative Pair where
+  pure a = Pair a a
+  (<*>) (Pair f g) (Pair a b) = Pair (f a) (g b)
+
+instance Eq a => EqProp (Pair a) where (=-=) = eq
+
+instance Arbitrary a => Arbitrary (Pair a) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    return (Pair a b)
+
+-- 2.
+data Two a b = Two a b deriving (Eq, Show)
+
+instance Functor (Two a) where
+  fmap f (Two a b) = Two a (f b)
+
+instance Monoid a => Applicative (Two a) where
+  pure a = Two mempty a
+  (<*>) (Two x f) (Two x' y) = Two (x <> x') (f y)
+
+instance (Eq a, Eq b) => EqProp (Two a b) where (=-=) = eq
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Two a b) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    return (Two a b)
+
+-- 3.
+data Three a b c = Three a b c deriving (Eq, Show)
+
+instance Functor (Three a b) where
+  fmap f (Three a b c) = Three a b (f c)
+
+instance (Monoid a, Monoid b) => Applicative (Three a b) where
+  pure x = Three mempty mempty x
+  (<*>) (Three x y z) (Three x' y' z') = Three (x <> x') (y <> y') (z z')
+
+instance (Eq a, Eq b, Eq c) => EqProp (Three a b c) where (=-=) = eq
+
+instance (Arbitrary a, Arbitrary b, Arbitrary c) => Arbitrary (Three a b c) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    c <- arbitrary
+    return (Three a b c)
+
+-- 4.
+data Three' a b = Three' a b b deriving (Eq, Show)
+
+instance Functor (Three' a) where
+  fmap f (Three' a b c) = Three' a (f b) (f c)
+
+instance Monoid a => Applicative (Three' a) where
+  pure x = Three' mempty x x
+  (<*>) (Three' x y z) (Three' x' y' z') = Three' (x <> x') (y y') (z z')
+
+instance (Eq a, Eq b) => EqProp (Three' a b) where (=-=) = eq
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Three' a b) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    return (Three' a b b)
+
+-- 5.
+data Four a b c d = Four a b c d deriving (Eq, Show)
+
+instance Functor (Four a b c) where
+  fmap f (Four a b c d) = Four a b c (f d)
+
+instance (Monoid a, Monoid b, Monoid c) => Applicative (Four a b c) where
+  pure x = Four mempty mempty mempty x
+  (<*>) (Four x y z w) (Four x' y' z' w') = Four (x <> x') (y <> y') (z <> z') (w w')
+
+instance (Eq a, Eq b, Eq c, Eq d) => EqProp (Four a b c d) where (=-=) = eq
+
+instance (Arbitrary a, Arbitrary b, Arbitrary c, Arbitrary d) => 
+  Arbitrary (Four a b c d) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    c <- arbitrary
+    d <- arbitrary
+    return (Four a b c d)
+
+-- 6.
+data Four' a b = Four' a a a b deriving (Eq, Show)
+
+instance Functor (Four' a) where
+  fmap f (Four' a b c d) = Four' a b c (f d)
+
+instance Monoid a => Applicative (Four' a) where
+  pure x = Four' mempty mempty mempty x
+  (<*>) (Four' x y z w) (Four' x' y' z' w') = Four' (x <> x') (y <> y') (z <> z') (w w')
+
+instance (Eq a, Eq b) => EqProp (Four' a b) where (=-=) = eq
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Four' a b) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    return (Four' a a a b)
+
+-- Combinations
+stops :: String
+stops = "pbtdkg"
+
+vowels :: String
+vowels = "aeiou"
+
+combos :: [a] -> [b] -> [c] -> [(a, b, c)]
+combos [] [] [] = []
+combos x y z = liftA3 (\a b c -> (a,b,c)) x y z
+
 --- MAIN ---
 main :: IO ()
-main = print ""
+main = do
+  let list = Cons (1 :: Int, 2 :: Int, 3 :: Int) Nil
+  quickBatch $ applicative list
+  quickBatch $ applicative $ ZipList' list
+
+  quickBatch $ applicative
+    (Failure' "err1"
+      :: Validation String (String, String, String))
+  quickBatch $ applicative $
+    Pair (1 :: Int, 1 :: Int, 1 :: Int) (2 :: Int, 2 :: Int, 2 :: Int)
+
+  quickBatch $ applicative $
+    Two ("a", "b", "c") (2 :: Int, 2 :: Int, 2 :: Int)
+
+  quickBatch $ applicative $
+    Three
+      ("a", "b", "c")
+      ([1 :: Int], [2 :: Int], [3 :: Int])
+      (2 :: Int, 2 :: Int, 2 :: Int)
+
+  quickBatch $ applicative $
+    Three'
+      ("a", "b", "c")
+      (2 :: Int, 2 :: Int, 2 :: Int)
+      (2 :: Int, 2 :: Int, 2 :: Int)
+
+  quickBatch $ applicative $
+    Four
+      ("a", "b", "c")
+      ([1 :: Int], [2 :: Int], [3 :: Int])
+      ([4 :: Int], [5 :: Int], [6 :: Int])
+      (2 :: Int, 2 :: Int, 2 :: Int)
+
+  quickBatch $ applicative $
+    Four'
+      ("a", "b", "c")
+      ("d", "e", "f")
+      ("g", "h", "i")
+      (2 :: Int, 2 :: Int, 2 :: Int)
