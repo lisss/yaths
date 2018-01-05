@@ -10,4 +10,6 @@ DataKinds pragma (for custom kinds) (https://www.schoolofhaskell.com/user/k_bx/p
 
 hindent - set up autoformatting
 
-WDIO reporter
+type families
+
+Alternative typeclass

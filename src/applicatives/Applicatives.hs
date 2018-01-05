@@ -60,6 +60,13 @@ instance Applicative Identity where
   pure a = Identity a
   (<*>) (Identity f) (Identity a) = Identity (f a)
 
+instance Eq a => EqProp (Identity a) where (=-=) = eq
+
+instance Arbitrary a => Arbitrary (Identity a) where
+  arbitrary = do
+    a <- arbitrary
+    return (Identity a)
+
 -- Exercise: Constant Instance
 
 newtype Constant a b = Constant { getConstant :: a }
@@ -71,6 +78,13 @@ instance Functor (Constant a) where
 instance Monoid a => Applicative (Constant a) where
   pure _ = Constant mempty
   (<*>) (Constant a) (Constant b) = Constant (a <> b)
+
+instance (Eq a, Eq b) => EqProp (Constant a b) where (=-=) = eq
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Constant a b) where
+  arbitrary = do
+    a <- arbitrary
+    return (Constant a)
 
 -- Using the Maybe Applicative (example)
 validateLength :: Int
@@ -353,6 +367,9 @@ combos x y z = liftA3 (\a b c -> (a,b,c)) x y z
 --- MAIN ---
 main :: IO ()
 main = do
+  quickBatch $ applicative (Identity ("a", "b", "c") :: Identity (String, String, String))
+  quickBatch $ applicative (Constant "a" :: Constant String (String, String, String))
+  
   let list = Cons (1 :: Int, 2 :: Int, 3 :: Int) Nil
   quickBatch $ applicative list
   quickBatch $ applicative $ ZipList' list

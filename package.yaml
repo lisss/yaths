@@ -38,6 +38,7 @@ library:
   - src/monoids
   - src/functors
   - src/applicatives
+  - src/monads
 
 executables:
   main:
@@ -104,6 +105,14 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     - -main-is Applicatives
+  monads:
+    main:                Monads.hs
+    source-dirs:         src/monads
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is Monads
 
 tests:
   addition:
