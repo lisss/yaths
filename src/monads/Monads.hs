@@ -2,6 +2,7 @@
 module Monads where
 
 import Control.Monad (join)
+import Data.Monoid((<>))
 import Test.QuickCheck
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
@@ -104,8 +105,67 @@ instance Arbitrary a => Arbitrary (Identity a) where
     return (Identity a)
 
 -- 4.
-data List a = Nil
-  | Cons a (List a)
+data List a = Nil | Cons a (List a) deriving (Eq, Show)
+
+instance Functor List where
+  fmap _ Nil = Nil
+  fmap f (Cons a l) = Cons (f a) (fmap f l)
+
+fold :: (a -> b -> b) -> b -> List a -> b
+fold _ b Nil = b
+fold f b (Cons h t) = f h (fold f b t)
+
+instance Monoid (List a) where
+  mempty = Nil
+  mappend Nil x = x
+  mappend (Cons x xs) ys = Cons x (mappend xs ys)
+
+concat' :: List (List a) -> List a
+concat' = fold mappend Nil
+
+flatMap :: (a -> List b) -> List a -> List b
+flatMap f as = concat' $ fmap f as
+
+instance Applicative List where
+  pure a = Cons a Nil
+  (<*>) Nil xs = Nil
+  (<*>) (Cons f xs) ys = (flatMap (\x -> Cons (f x) Nil) ys) <> (xs <*> ys)
+
+instance Monad List where
+  (>>=) Nil _ = Nil
+  (>>=) (Cons x xs) f = f x <> (xs >>= f)
+
+instance Eq a => EqProp (List a) where (=-=) = eq
+
+instance Arbitrary a => Arbitrary (List a) where
+  arbitrary = do
+    a <- arbitrary
+    elements [Nil, Cons a Nil]
+
+-- Write the following functions using the methods provided by Monad and Functor
+-- 1.
+j :: Monad m => m (m a) -> m a
+j a = join a
+
+-- 2.
+l1 :: Monad m => (a -> b) -> m a -> m b
+l1 f a = fmap f a
+
+-- 3.
+l2 :: Monad m => (a -> b -> c) -> m a -> m b -> m c
+l2 f a b = a >>= \a' -> b >>= \b' -> return (f a' b')
+
+-- 4.
+a :: Monad m => m a -> m (a -> b) -> m b
+a x y = y <*> x
+
+-- 5.
+meh :: Monad m => [a] -> (a -> m b) -> m [b]
+meh (x:xs) f = sequence $ f x : fmap f xs
+
+-- 6.
+flipType :: (Monad m) => [m a] -> m [a]
+flipType = flip meh id
 
 main :: IO ()
 main = do
@@ -116,3 +176,4 @@ main = do
     (Left' ("a", "b", "c")
       :: PhhhbbtttEither (String, String, String) (String, String, String))
   quickBatch $ monad (Identity ("a", "b", "c") :: Identity (String, String, String))
+  quickBatch $ monad (Cons (1, 2, 3) Nil :: List (Int, Int, Int))
