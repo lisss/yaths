@@ -1,4 +1,3 @@
--- <<< TODO >>> Separate out all the repeating types (Identity, Pair etc.)
 module Monads where
 
 import Control.Monad (join)
@@ -6,21 +5,15 @@ import Data.Monoid((<>))
 import Test.QuickCheck
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
+import Functors(Sum(First, Second))
+import Applicatives(List(Nil, Cons), Identity(Identity))
 
 bind :: Monad m => (a -> m b) -> m a -> m b
 bind f m = join $ fmap f m
 -- bind = flip (>>=)
 
 -- Short Exercise: Either Monad
-
-data Sum a b =
-  First a
-  | Second b
-  deriving (Eq, Show)
-
-instance Functor (Sum a) where
-  fmap _ (First a) = First a
-  fmap f (Second b) = Second (f b)
+-- See Sum type from Functors module
 
 instance Applicative (Sum a) where
   pure = Second
@@ -84,63 +77,14 @@ instance (Arbitrary a, Arbitrary b) => Arbitrary (PhhhbbtttEither b a) where
     b <- arbitrary
     elements [Left' a, Right' b]
 
--- 3.
-newtype Identity a = Identity a deriving (Eq, Ord, Show)
-
-instance Functor Identity where
-  fmap f (Identity a) = Identity (f a)
-
-instance Applicative Identity where
-  pure a = Identity a
-  (<*>) (Identity f) (Identity a) = Identity (f a)
-
+-- 3. See Identity type from Applicatives module
 instance Monad Identity where
   (>>=) (Identity a) f = f a
 
-instance Eq a => EqProp (Identity a) where (=-=) = eq
-
-instance Arbitrary a => Arbitrary (Identity a) where
-  arbitrary = do
-    a <- arbitrary
-    return (Identity a)
-
--- 4.
-data List a = Nil | Cons a (List a) deriving (Eq, Show)
-
-instance Functor List where
-  fmap _ Nil = Nil
-  fmap f (Cons a l) = Cons (f a) (fmap f l)
-
-fold :: (a -> b -> b) -> b -> List a -> b
-fold _ b Nil = b
-fold f b (Cons h t) = f h (fold f b t)
-
-instance Monoid (List a) where
-  mempty = Nil
-  mappend Nil x = x
-  mappend (Cons x xs) ys = Cons x (mappend xs ys)
-
-concat' :: List (List a) -> List a
-concat' = fold mappend Nil
-
-flatMap :: (a -> List b) -> List a -> List b
-flatMap f as = concat' $ fmap f as
-
-instance Applicative List where
-  pure a = Cons a Nil
-  (<*>) Nil xs = Nil
-  (<*>) (Cons f xs) ys = (flatMap (\x -> Cons (f x) Nil) ys) <> (xs <*> ys)
-
+-- 4. See List type from Applicatives module
 instance Monad List where
   (>>=) Nil _ = Nil
   (>>=) (Cons x xs) f = f x <> (xs >>= f)
-
-instance Eq a => EqProp (List a) where (=-=) = eq
-
-instance Arbitrary a => Arbitrary (List a) where
-  arbitrary = do
-    a <- arbitrary
-    elements [Nil, Cons a Nil]
 
 -- Write the following functions using the methods provided by Monad and Functor
 -- 1.

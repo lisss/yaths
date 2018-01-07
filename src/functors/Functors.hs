@@ -312,7 +312,7 @@ instance Functor g => Functor (Notorious g o a) where
   fmap f (Notorious ga go gt) = Notorious ga go (fmap f gt)
 
 -- 9.
-data List a = Nil | Cons a (List a) deriving Show
+data List a = Nil | Cons a (List a) deriving (Eq, Show)
 instance Functor List where
   fmap _ Nil = Nil
   fmap f (Cons a l) = Cons (f a) (fmap f l)
