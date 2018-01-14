@@ -1,9 +1,23 @@
 {-# LANGUAGE FlexibleInstances #-}
-module Functors where
+module Functors (
+  Optional(Nada,Only)
+  ,Identity(Identity)
+  ,List(Nil,Cons)
+  ,Pair(Pair)
+  ,Two(Two)
+  ,Three(Three)
+  ,Three'(Three')
+  ,Four(Four)
+  ,Four'(Four')
+  ,Four''(Four'')
+  ,Sum(First, Second)
+  ,main
+  ) where
 
 import Test.QuickCheck
 import Test.QuickCheck.Function
 import GHC.Arr
+import Chapter15 (Optional(Nada,Only))
 
 replaceWithP :: b -> Char
 replaceWithP = const 'p'
@@ -341,6 +355,22 @@ instance Functor TalkToMe where
   fmap _ Halt = Halt
   fmap f (Print a b) = Print a (f b)
   fmap f (Read f') = Read (fmap f f')
+
+-- Extra
+instance Functor Optional where
+  fmap _ Nada = Nada
+  fmap f (Only a) = Only (f a)
+
+data Four'' a b = Four'' a b b b deriving (Eq, Show)
+
+instance Functor (Four'' a) where
+  fmap f (Four'' a b b' b'') = Four'' a (f b) (f b') (f b'')
+
+instance (Arbitrary a, Arbitrary b) => Arbitrary (Four'' a b) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    return (Four'' a b b b)
 
 --- MAIN ---
 main :: IO ()

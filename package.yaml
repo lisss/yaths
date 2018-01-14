@@ -27,6 +27,8 @@ dependencies:
 - QuickCheck
 - checkers
 - hspec
+- wreq
+- bytestring
 
 library:
   source-dirs:
@@ -93,6 +95,8 @@ executables:
   functors:
     main:                Functors.hs
     source-dirs:         src/functors
+    dependencies:
+    - yaths
     ghc-options:
     - -threaded
     - -rtsopts
@@ -119,7 +123,7 @@ executables:
     - -with-rtsopts=-N
     - -main-is Monads
   fold-trav:
-    main:                Foldable.hs
+    main:                Main.hs
     source-dirs:         src/foldable_traversable
     dependencies:
     - yaths
@@ -127,7 +131,7 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -main-is Foldable
+    - -main-is Main
 
 tests:
   addition:

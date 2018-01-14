@@ -1,6 +1,31 @@
-module Foldable where
+module Foldable (
+  Identity(Identity)
+  ,Constant(Constant)
+  ,List(Nil,Cons)
+  ,Two(Two)
+  ,Three(Three)
+  ,Three'(Three')
+  ,Four'(Four')
+  ,Four''(Four'')
+  ,Optional(Nada,Only)
+  ) where
 
 import Data.Monoid
+import Applicatives(
+  Identity(Identity)
+  ,Constant(Constant)
+  ,List(Nil,Cons)
+  ,Two(Two)
+  ,Three(Three)
+  ,Three'(Three')
+  ,Four'(Four')
+  ,Four''(Four'')
+  )
+
+import Functors(
+  Optional(Nada,Only)
+  ,Pair(Pair)
+  )
 
 -- Exercises: Library Functions
 
@@ -54,40 +79,33 @@ foldMap' f = foldr (\x _ -> f x) mempty
 
 -- Chapter Exercises
 -- 1.
-newtype Constant a b = Constant b deriving (Eq, Show)
+newtype Constant' a b = Constant' b deriving (Eq, Show)
 
-instance Foldable (Constant a) where
-  foldr f z (Constant x) = f x z
-  foldl f z (Constant x) = f z x
-  foldMap f (Constant x) = f x
+instance Foldable (Constant' a) where
+  foldr f z (Constant' x) = f x z
+  foldl f z (Constant' x) = f z x
+  foldMap f (Constant' x) = f x
 
 -- 2.
-data Two a b = Two a b
-
 instance Foldable (Two a) where
   foldr f z (Two _ b) = f b z
   foldl f z (Two _ b) = f z b
   foldMap f (Two _ b) = f b
 
--- 3.
-data Three a b c = Three a b c
-
+-- 3. See Three type from Applicatives module
 instance Foldable (Three a b) where
   foldr f z (Three _ _ c) = f c z
   foldl f z (Three _ _ c) = f z c
   foldMap f (Three _ _ c) = f c
 
--- 4.
-data Three' a b = Three' a b b
+-- 4. See Three' type from Applicatives module
 
 instance Foldable (Three' a) where
   foldr f z (Three' _ _ b) = f b z
   foldl f z (Three' _ _ b) = f z b
-  foldMap f (Three' _ _ b) = f b
+  foldMap f (Three' _ a b) = f a <> f b
 
 -- 5.
-data Four' a b = Four' a b b b
-
 instance Foldable (Four' a) where
   foldr f z (Four' _ _ _ b) = f b z
   foldl f z (Four' _ _ _ b) = f z b
@@ -98,4 +116,20 @@ filterF :: (Applicative f, Foldable t, Monoid (f a))
   => (a -> Bool) -> t a -> f a
 filterF f = foldMap (\x -> if f x then pure x else mempty)
 
-main = print ""
+-- Extra
+instance Foldable Identity where
+  foldr f z (Identity a) = f a z
+
+instance Foldable (Constant a) where
+  foldr f z (Constant _) = z
+
+instance Foldable List where
+  foldr f z Nil = z
+  foldr f z (Cons a lst) = f a (foldr f z lst)
+
+instance Foldable Optional where
+  foldr f z Nada = z
+  foldr f z (Only a) = f a z
+
+instance Foldable (Four'' a) where
+  foldMap f (Four'' _ b b' b'') = f b <> f b' <> f b''

@@ -1,6 +1,12 @@
 module Applicatives(
   Identity(Identity)
   ,List(Nil, Cons)
+  ,Constant(Constant)
+  ,Two(Two)
+  ,Three(Three)
+  ,Three'(Three')
+  ,Four'(Four')
+  ,Four''(Four'')
   ,main) where
 
 import Data.List (elemIndex)
@@ -17,7 +23,9 @@ import Functors(
   ,Three(Three)
   ,Three'(Three')
   ,Four(Four)
-  ,Four'(Four'))
+  ,Four'(Four')
+  ,Four''(Four'')
+  )
 
 -- Exercises: Lookups
 
@@ -113,10 +121,6 @@ instance Applicative List where
   pure a = Cons a Nil
   (<*>) Nil xs = Nil
   (<*>) (Cons f xs) ys = (flatMap (\x -> Cons (f x) Nil) ys) <> (xs <*> ys)
-
-f = Cons (+1) (Cons (*2) Nil)
-v = Cons 1 (Cons 2 Nil)
-fv = f <*> v
 
 instance Eq a => EqProp (List a) where (=-=) = eq
 
@@ -251,6 +255,13 @@ vowels = "aeiou"
 combos :: [a] -> [b] -> [c] -> [(a, b, c)]
 combos [] [] [] = []
 combos x y z = liftA3 (,,) x y z
+
+-- Extra
+instance Monoid a => Applicative (Four'' a) where
+  pure x = Four'' mempty x x x
+  (<*>) (Four'' x y z w) (Four'' x' y' z' w') = Four'' (x <> x') (y y') (z z') (w w')
+
+instance (Eq a, Eq b) => EqProp (Four'' a b) where (=-=) = eq
 
 --- MAIN ---
 main :: IO ()
