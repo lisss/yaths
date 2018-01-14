@@ -250,7 +250,7 @@ vowels = "aeiou"
 
 combos :: [a] -> [b] -> [c] -> [(a, b, c)]
 combos [] [] [] = []
-combos x y z = liftA3 (\a b c -> (a,b,c)) x y z
+combos x y z = liftA3 (,,) x y z
 
 --- MAIN ---
 main :: IO ()

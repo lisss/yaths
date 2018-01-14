@@ -39,6 +39,7 @@ library:
   - src/functors
   - src/applicatives
   - src/monads
+  - src/foldable_traversable
 
 executables:
   main:
@@ -117,6 +118,16 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     - -main-is Monads
+  fold-trav:
+    main:                Foldable.hs
+    source-dirs:         src/foldable_traversable
+    dependencies:
+    - yaths
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is Foldable
 
 tests:
   addition:
