@@ -4,7 +4,6 @@ module Reader where
 import Data.Char
 import Control.Monad(join)
 import Control.Applicative
-import Data.Maybe
 
 -- Short Exercise: Warming Up
 cap :: [Char] -> [Char]
@@ -144,20 +143,4 @@ sequA m = sequenceA [(>3), (<8), even] m
 
 s' = summed <$> ((,) <$> xs <*> ys)
 
---- MAIN ---
-main :: IO ()
-main = do
-  print $ runReader getDogRM' pers
-  print ">>> Chapter Exercises"
-  print $ sequenceA [Just 3, Just 2, Just 1]
-  print $ sequenceA [x, y]
-  print $ sequenceA [xs, ys]
-  print $ summed <$> ((,) <$> xs <*> ys)
-  print $ fmap summed ((,) <$> xs <*> zs)
-  print $ bolt 7
-  print $ fmap bolt z
-  print $ sequenceA [(>3), (<8), even] 7
-  ----
-  print $ foldr (&&) True seqA 30
-  sequA $ fromMaybe 0 s'
-  bolt $ fromMaybe 0 ys
+-- Rewriting Shawty - TODO!!!

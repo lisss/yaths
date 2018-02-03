@@ -30,6 +30,7 @@ dependencies:
 - wreq
 - bytestring
 - mtl
+- random
 
 library:
   source-dirs:
@@ -135,7 +136,7 @@ executables:
     - -with-rtsopts=-N
     - -main-is Main
   reader-state:
-    main:                Reader.hs
+    main:                MainRS.hs
     source-dirs:         src/reader_state
     dependencies:
     - yaths
@@ -143,7 +144,7 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -main-is Reader
+    - -main-is MainRS
 
 tests:
   addition:
