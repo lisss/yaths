@@ -2,6 +2,9 @@
 module State where
 
 import System.Random
+import Control.Monad
+import Control.Monad.Trans.State
+import qualified Data.DList as DL
 
 data Die =
   DieOne
@@ -91,3 +94,49 @@ instance Monad (Moi s) where
     let (a, s) = f x
         (Moi sb) = g a
     in sb s
+
+-- Fizzbuzz Differently
+fizzBuzz :: Integer -> String
+fizzBuzz n | n `mod` 15 == 0 = "FizzBuzz"
+  | n `mod` 5 == 0 = "Buzz"
+  | n `mod` 3 == 0 = "Fizz"
+  | otherwise = show n
+
+addResult :: Integer -> State (DL.DList String) ()
+addResult n = do
+  xs <- get
+  let result = fizzBuzz n
+  -- snoc appends to the end, unlike
+  -- cons which adds to the front
+  put (DL.snoc xs result)
+
+fizzbuzzList :: [Integer] -> DL.DList String
+fizzbuzzList list = execState (mapM_ addResult list) DL.empty
+
+-- Excersice
+fizzbuzzFromTo :: Integer -> Integer -> [String]
+fizzbuzzFromTo f t
+  | f == t = [fizzBuzz f]
+  | f < t = fizzBuzz f : fizzbuzzFromTo (f + 1) t
+  | otherwise = fizzbuzzFromTo t f
+
+-- Chapter exercises
+-- 1.
+get' :: Moi s s
+get' = Moi $ \s -> (s, s)
+
+-- 2.
+put' :: s -> Moi s ()
+put' s = Moi $ const ((), s)
+
+-- 3.
+exec :: Moi s a -> s -> s
+exec st = snd . runMoi st
+
+-- 4.
+eval :: Moi s a -> s -> a
+eval st = fst . runMoi st
+
+-- 5.
+modify :: (s -> s) -> Moi s ()
+modify f = Moi $ \s -> ((), f s)
