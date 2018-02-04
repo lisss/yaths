@@ -37,30 +37,20 @@ dependencies:
 library:
   source-dirs:
   - src
-  - src/chapters
   - src/morse
   - src/quickCheck
   - src/phone
-  - src/monoids
-  - src/functors
-  - src/applicatives
-  - src/monads
-  - src/foldable_traversable
-  - src/reader_state
+  - src/ch15
+  - src/ch16
+  - src/ch17
+  - src/ch18
+  - src/ch20-21
+  - src/ch22-23
 
 executables:
-  main:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - yaths
   cipher:
     main:                Cipher.hs
-    source-dirs:         src/chapters
+    source-dirs:         src
     ghc-options:
     - -threaded
     - -rtsopts
@@ -89,17 +79,17 @@ executables:
     dependencies:
     - yaths
     - random
-  monoids:
-    main:                Chapter15.hs
-    source-dirs:         src/monoids
+  monoid_semi:
+    main:                Monoid_Semigroup.hs
+    source-dirs:         src/ch15
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -main-is Chapter15
+    - -main-is Monoid_Semigroup
   functors:
     main:                Functors.hs
-    source-dirs:         src/functors
+    source-dirs:         src/ch16
     dependencies:
     - yaths
     ghc-options:
@@ -109,7 +99,7 @@ executables:
     - -main-is Functors
   applicatives:
     main:                Applicatives.hs
-    source-dirs:         src/applicatives
+    source-dirs:         src/ch17
     dependencies:
     - yaths
     ghc-options:
@@ -119,7 +109,7 @@ executables:
     - -main-is Applicatives
   monads:
     main:                Monads.hs
-    source-dirs:         src/monads
+    source-dirs:         src/ch18
     dependencies:
     - yaths
     ghc-options:
@@ -128,18 +118,18 @@ executables:
     - -with-rtsopts=-N
     - -main-is Monads
   fold-trav:
-    main:                Main.hs
-    source-dirs:         src/foldable_traversable
+    main:                MainFT.hs
+    source-dirs:         src/ch20-21
     dependencies:
     - yaths
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
-    - -main-is Main
+    - -main-is MainFT
   reader-state:
     main:                MainRS.hs
-    source-dirs:         src/reader_state
+    source-dirs:         src/ch22-23
     dependencies:
     - yaths
     ghc-options:

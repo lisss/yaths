@@ -17,7 +17,7 @@ module Functors (
 import Test.QuickCheck
 import Test.QuickCheck.Function
 import GHC.Arr
-import Chapter15 (Optional(Nada,Only))
+import Monoid_Semigroup (Optional(Nada,Only))
 
 replaceWithP :: b -> Char
 replaceWithP = const 'p'

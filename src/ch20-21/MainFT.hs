@@ -1,4 +1,4 @@
-module Main where
+module MainFT where
 
 import Foldable
 import Traversable(S(S), Tree(Leaf,Node))

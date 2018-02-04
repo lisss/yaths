@@ -1,6 +1,6 @@
 -- {-# LANGUAGE FlexibleContexts #-}
 
-module Chapter15 where
+module Monoid_Semigroup where
 
 import Data.Monoid
 import qualified Data.Semigroup as S
