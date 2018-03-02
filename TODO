@@ -13,3 +13,7 @@ hindent - set up autoformatting
 type families
 
 Alternative typeclass
+
+regex-applicative lib
+
+foldr (<|>)
