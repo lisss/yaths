@@ -3,17 +3,13 @@ module ParserLog where
 
 import Text.Trifecta
 import Data.Time
+import Control.Applicative
 import ParserUtils
 
-readFile1 :: IO ()
-readFile1 = do
-  f <- readFile "data/logfile"
-  print f
-
-skipComment :: Parser ()
-skipComment =
+skipCommentOrDate :: Parser ()
+skipCommentOrDate =
   skipMany (do
-    _ <- string "--"
+    string "#" <|> string "--"
     skipMany (noneOf "\n")
     skipEOL)
 
@@ -26,26 +22,16 @@ parseDate' = do
   d <- parseTwo
   skipEOL
 
-parseTime' :: Parser (String, Int, Int)
-parseTime' = do
+-- parseLine :: Parser ([String], Int, Int)
+parseLine = do
   h <- parseTwo
   c <- char ':'
   m <- parseTwo
-  space
-  l <- many letter
-  s <- many space
-  -- ln <- parseLine
-  return (l, h, m)
-
-parseLine :: Parser String
-parseLine = do
-  l <- some letter
-  s <- optional space
-  case s of
-    Nothing -> do
-      char '\n'
-      return l
-    _ -> parseLine
+  skipMany space
+  act <- manyTill (noneOf "\n") (try (string "--")) --doesn't work!
+  skipMany $ noneOf "\n"
+  skipEOL
+  return (act, h, m)
 
 readTime' :: String -> String -> UTCTime
 readTime' f dateString = parseTimeOrError True defaultTimeLocale f dateString
@@ -57,18 +43,12 @@ diffTime t1 t2 = floor . toRational $ diffUTCTime t2 t1
 -- parseDate = do
 --   between (string "# ") (string "\n") (some letter)
 
-skipStartDate :: Parser ()
-skipStartDate =
-  skipMany (do
-    _ <- string "#"
-    skipMany (noneOf "\n")
-    skipEOL)
 
-p :: Parser [(String, Int, Int)]
-p = skipComment >> skipStartDate >> many parseTime'
+-- p1 :: Parser [([String], Int, Int)]
+p1 = skipCommentOrDate >> many parseLine
 
 pr :: IO ()
 pr = do
   c <- readFile "data/logfile"
-  print $ parseString p mempty c
+  print $ parseString p1 mempty c
 

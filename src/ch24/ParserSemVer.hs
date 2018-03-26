@@ -10,6 +10,7 @@ type Minor = Integer
 type Patch = Integer
 type Release = [NumOrStr]
 type Metadata = [NumOrStr]
+-- TODO: write Ord instance
 data SemVer = SemVer Major Minor Patch Release Metadata deriving (Show, Eq, Ord)
 
 parseNos' :: Parser NumOrStr
@@ -34,7 +35,7 @@ parseReleaseOrMeta separator = do
   
 parseSemVer :: Parser SemVer
 parseSemVer = do
-  maj <- decimal
+  maj <- decimal -- use natural? check it
   char '.'
   min <- decimal
   char '.'

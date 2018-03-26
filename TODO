@@ -17,3 +17,7 @@ Alternative typeclass
 regex-applicative lib
 
 foldr (<|>)
+
+time lib, groom package, monoidal-containers (may be used for avg)
+
+resourceT monad trans

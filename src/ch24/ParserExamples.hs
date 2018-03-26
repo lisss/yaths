@@ -35,25 +35,20 @@ oneEOF = print $ parseString (one >> eof) mempty "123"
 oneTwoEOF :: IO ()
 oneTwoEOF = print $ parseString (oneTwo >> eof) mempty "123" 
 
--- 2. TODO: learn more about <*
--- try choise
+-- 2. Try choise?
 eitherOfThree :: Parser String
 eitherOfThree = (string "123" <|> string "12" <|> string "1") <* eof
 
--- TODO: learn more about stop
 eitherOfThreeStop :: Parser String
 eitherOfThreeStop = (string "123" <|> string "12" <|> string "1") <* stop
 
--- 3. TODO: myString :: String -> Parser String --> check 
+-- 3. TODO: myString :: String -> Parser String --> check why missing
 eitherOfThreeChar :: Parser Char
 eitherOfThreeChar = (char 'a' <|> char 'b' <|> char 'c') <* eof
 
--- Exercise: Unit of Success (integer <* eof)
+-- Exercise: Unit of Success
 parseInt :: Parser Integer
-parseInt = do
-  a <- integer
-  eof
-  return a
+parseInt = integer <* eof
 
 -- Example: Alternative
 type NumberOrString = Either Integer String
